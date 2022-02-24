@@ -6,10 +6,18 @@
 #--
 #-- GNU Lesser General Public License (LGPL)
 #-------------------------------------------------
+DEBUG = True
+if DEBUG:
+    import ptvsd
+    print("Waiting for debugger attach")
+    # 5678 is the default attach port in the VS Code debug configurations
+    #ptvsd.enable_attach(address=('localhost', 5678), redirect_output=True)
+    ptvsd.enable_attach(address=('localhost', 5678))
+    ptvsd.wait_for_attach()
 
 import FreeCAD
-import PySide
-from PySide import QtCore, QtGui, QtSvg
+import PySide2
+from PySide2 import QtCore, QtGui, QtSvg
 global QtGui,QtCore
 
 
@@ -29,7 +37,9 @@ from configmanager import ConfigManager
 
 global AppHomePath
 AppHomePath=FreeCAD.ConfigGet('AppHomePath')
+LocalSharePath=FreeCAD.ConfigGet('UserAppData')
 
+global MyBut
 
 cm=ConfigManager("ObjectTree")
 
@@ -50,7 +60,8 @@ def TypeIcon(typeId='Part::Cut'):
 	f2=QtCore.QFileInfo("icons:"+ tk + ".svg")
 	if f2.exists():
 		return QtGui.QIcon("icons:"+ tk + ".svg") 
-	if typeIcons.has_key(typeId):
+#	if typeIcons.has_key(typeId):
+	if typeId in typeIcons:
 		f2=QtCore.QFileInfo(typeIcons[typeId])
 		if f2.exists():
 			return QtGui.QIcon(typeIcons[typeId])
@@ -62,15 +73,15 @@ def createTree(obj,n,mode):
 	if n<2: 
 		tree={'obj':obj,'subs':[],'subtyp':n,'status':'normal','a_label':obj.Label,'a_typeId':obj.TypeId} 
 	else:
-		tree={'obj':obj,'subs':[],'subtyp':n,'status':'hide','a_label':obj.Label,'a_typeId':obj.TypeId} 
-	
-	print "--------------------"
-	print obj.Label
+		tree={'obj':obj,'subs':[],'subtyp':n,'status':'hide','a_label':obj.Label,'a_typeId':obj.TypeId}
+
+	print("--------------------")
+	print(obj.Label)
 	k=obj.OutList
-	print "--------------------"
+	print("--------------------")
 	for it in k:
-		print it.Label, " => ",it.TypeId
-	print "--------------------"
+		print(it.Label, " => ",it.TypeId)
+	print("--------------------")
 	
 	if mode == 'parents':
 		if obj.TypeId=='PartDesign::Mirrored' or obj.TypeId=='PartDesign::LinearPattern':
@@ -109,17 +120,17 @@ def createTree(obj,n,mode):
 			# k.reverse()
 			
 			# treealt=["intitree-----------------------------------"]
-			print "#######"
+			print("#######")
 			m=n+len(k)
 			for it in k:
-				print "++++++++++++++++"
-				print it.Label," " ,it.TypeId," m",m
+				print("++++++++++++++++")
+				print(it.Label," " ,it.TypeId," m",m)
 				treeneu={'obj':it,'subs':[treealt],'subtyp':m,'status':'normal','a_label':it.Label} 
 				m -= 1
 				treealt=treeneu
 				import pprint
 				pprint.pprint(treealt)
-			print "########"
+			print("########")
 			tree['subs']=[treealt]
 			tree['subtyp']=n
 
@@ -152,7 +163,7 @@ def sayTree(ot):
 			ss= "* " * ot[k]
 		if k == 'obj':
 			name = ot[k].Label
-#	print ss + name
+#	print(ss + name)
 	for s in ot['subs']:
 			sayTree(s)
 
@@ -204,10 +215,10 @@ def initBuff():
 			v=obj.ViewObject.Visibility
 			t=obj.ViewObject.Transparency
 			buff[obj]=[v,t]
-			say("!" +obj.Label + ":"+str(obj.ViewObject.Transparency) + "-- "+ str(obj.ViewObject.Visibility))
+			print("!" +obj.Label + ":"+str(obj.ViewObject.Transparency) + "-- "+ str(obj.ViewObject.Visibility))
 			v=obj.ViewObject.Visibility=False
 		except:
-			say (obj.Label + "not init buff") 
+			print(obj.Label + "not init buff") 
 
 initBuff()
 
@@ -241,7 +252,7 @@ class MyBut(QtGui.QPushButton):
 		self.obj.ViewObject.Transparency=0
 		self.obj.ViewObject.DisplayMode = "Flat Lines"
 		self.obj.ViewObject.Visibility=True
-		say("mouse enter A " + self.obj.Label)
+		print("mouse enter A " + self.obj.Label)
 		try:
 			if lastObj:
 				lo=lastObj[0]
@@ -250,12 +261,12 @@ class MyBut(QtGui.QPushButton):
 				lastObj=[self.obj,self.color]
 				#FreeCADGui.SendMsgToActiveView("ViewFit")
 				FreeCAD.ActiveDocument.recompute()
-				say(lo.ViewObject.ShapeColor)
+				print(lo.ViewObject.ShapeColor)
 		except:
-			sayexc("hk2")
+			print("hk2")
 
 	def leaveEvent(self,ev):
-		say("mouse Leave A " + self.obj.Label) 
+		print("mouse Leave A " + self.obj.Label) 
 		try:
 			self.obj.ViewObject.Visibility=False
 			self.obj.ViewObject.ShapeColor=self.color
@@ -265,12 +276,12 @@ class MyBut(QtGui.QPushButton):
 				pass
 			self.obj.ViewObject.Visibility=True
 		except:
-			sayexc("hu44")
+			print("hu44")
 		FreeCAD.ActiveDocument.recompute()
 
 	def mousePressEvent(self, ev):
 		#FreeCAD.Console.PrintMessage("k mouse press")
-		say("mouse Press A " + self.obj.Label) 
+		print("mouse Press A " + self.obj.Label) 
 		#FreeCAD.Console.PrintMessage("Label clicked  " +  ot['obj'].Label + "\n")
 		FreeCADGui.Selection.clearSelection()
 		## FreeCADGui.Selection.addSelection(self.ot['obj'])
@@ -279,8 +290,8 @@ class MyBut(QtGui.QPushButton):
 
 	def eventFilter1(self,ev):
 		FreeCAD.Console.PrintMessage("kgdfgfdk")
-		say(" c gfgdfgfd nter event")
-		say(ev)
+		print(" c gfgdfgfd nter event")
+		print(ev)
 
 
 
@@ -297,15 +308,15 @@ def hideall():
 global showall2
 def showall2():
 	os=FreeCAD.ActiveDocument.Objects
-	say("showall2")
-	# say(os)
+	print("showall2")
+	# print(os)
 	for obj in os:
-#		say("show all")
+#		print("show all")
 		obj.ViewObject.Visibility=buff[obj][0]
 		obj.ViewObject.Transparency=buff[obj][1]
 		obj.ViewObject.DisplayMode = "Flat Lines"
 #		obj.ViewObject.Visibility=buff[obj][0]
-#		say("!" +obj.Label + ":"+str(obj.ViewObject.Transparency) + "-- "+ str(obj.ViewObject.Visibility))
+#		print("!" +obj.Label + ":"+str(obj.ViewObject.Transparency) + "-- "+ str(obj.ViewObject.Visibility))
 	#FreeCADGui.SendMsgToActiveView("ViewFit")
 	
 
@@ -380,19 +391,19 @@ class MyWindow2(QtGui.QWidget) :
 		self.leaved=not self.leaved
 		if self.leaved:
 			pass
-		#say("showall2")
+		#print("showall2")
 		try: 
 			#showall2()
 			pass
 		except:
-			sayexc("huhu")
+			print("huhu")
 		for obj in context.keys():
-			say("show all context -- " + obj.Label)
+			print("show all context -- " + obj.Label)
 			obj.ViewObject.Visibility=True
 			obj.ViewObject.Transparency=80
 			obj.ViewObject.DisplayMode = "Shaded"
 
-		say("showall2 done")
+		print("showall2 done")
 
 
 	def setMouseTracking(self, flag):
@@ -408,7 +419,7 @@ class MyWindow2(QtGui.QWidget) :
 
 	def mouseMoveEvent(self, event):
 		FreeCAD.Console.PrintMessage("--- ")
-##		print 'mouseMoveEvent: x=%d, y=%d' % (event.x(), event.y())
+##		print('mouseMoveEvent: x=%d, y=%d' % (event.x(), event.y()))
 
 
 
@@ -416,7 +427,7 @@ class MyWindow2(QtGui.QWidget) :
 
 
 #----------------------
-global MyBut
+#global MyBut
 class MyButA(QtGui.QPushButton):
 	
 	def __init__(self,icon=None,label=''):
@@ -449,7 +460,7 @@ class MyButA(QtGui.QPushButton):
 class MyWidget(QtGui.QWidget):
 	def __init__(self, master,*args):
 		QtGui.QWidget.__init__(self, *args)
-		
+		self.leaved=True
 		self.master=master
 		FreeCAD.mywidget=self
 		self.printed=[]
@@ -501,7 +512,7 @@ class MyWidget(QtGui.QWidget):
 			QWidget2 {border:2px solid green;background-color:}")
 		
 		
-		self.butti2= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/camera-photo.png'),"Snapshot")
+		self.butti2= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/camera-photo.png'),"Snapshot")
 		self.hlayout.addWidget(self.butti2)
 		self.butti2.clicked.connect(renderWidget)
 		
@@ -642,22 +653,22 @@ class MyWidget(QtGui.QWidget):
 #			self.layout.addWidget(butte, oy+self.line, ox+3*row+2)
 
 		
-		say(AppHomePath)
+		print(AppHomePath)
 		if row >0:
 			if mode ==1  :
-				butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/single.png'),"")
+				butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/single.png'),"")
 			elif mode ==0 :
-				butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/start.png'),"")
+				butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/start.png'),"")
 			elif mode == -1:
 				if ax== -1:
-					butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/end2.png'),"")
+					butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/end2.png'),"")
 				else:
-					butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/end.png'),"")
+					butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/end.png'),"")
 			else:
 				if ax== -1:
-					butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/downl-l.png'),"" )
+					butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/downl-l.png'),"" )
 				else:
-					butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/downl-r.png'),"" )
+					butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/downl-r.png'),"" )
 			if ax== -1:
 				self.layout.addWidget(butte, oy+ay*self.line, ox+ax*3*row-1+2+1)
 			else:
@@ -714,13 +725,13 @@ def sayWidgetTree(w,ot,mode=0,dir='+x'):
 	# w.printed2.append(obj)
 	for p in vlines.keys():
 		if vlines[p]:
-			if vlines[p]==1 and filled[w.line][3*p+2]<>1:
+			if vlines[p]==1 and filled[w.line][3*p+2]!=1:
 				butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/down.png'),"" )
 	anz=len(ot['subs'])
 	startline=w.line
 	if ot['status']=='normal':
 		for s in range(anz):
-			# print (s)
+			# print(s)
 			if s==0 and anz==1:
 				mode2=1
 				vlines[pos]=0
@@ -763,7 +774,7 @@ def fullRefresh(mode='parents'):
 	for x in range(100):
 		filled[x]={}
 		for y in range(100):
-			#print x,y
+			#print(x,y)
 			filled[x][y]=0
 	
 	for k in w.mw.findChildren(QtGui.QPushButton):
@@ -813,7 +824,7 @@ def fullRefresh(mode='parents'):
 	w.update()
 	
 	for obj in context.keys():
-		say("show all context -- " + obj.Label)
+		print("show all context -- " + obj.Label)
 		obj.ViewObject.Visibility=True
 		obj.ViewObject.Transparency=30
 
@@ -890,12 +901,12 @@ class searchWidget(QtGui.QWidget):
 		pat=str(self.pat.text())
 		FreeCAD.Console.PrintMessage("pat:"+pat+"!\n")
 		for oj in os:
-			# print oj.Label
+			# print(oj.Label)
 			
 			
 			if re.search(pat, oj.Label):
 				FreeCAD.Console.PrintMessage(oj.Label)
-				print oj.Label," okay" 
+				print(oj.Label," okay" )
 				res.append(oj)
 		self.res=res
 
@@ -1018,7 +1029,7 @@ def doSomething():
 		#FreeCAD.Console.PrintMessage(c.__class__)
 		if c.__class__ == QtGui.QDockWidget:
 			#FreeCAD.Console.PrintMessage(c.windowTitle())
-			#print c, c.objectName(), c.windowTitle()
+			#print(c, c.objectName(), c.windowTitle())
 			if str(c.objectName())=="Property view":
 				c.show()
 				c.raise_()
@@ -1037,7 +1048,7 @@ if False:
 	ob1= App.ActiveDocument.MultiTransform
 	mode='parents'
 	ot=createTree(ob1,0,mode)
-	print ot
+	print(ot)
 	sayTree(ot)
 	import pprint
 	pprint.pprint(ot)

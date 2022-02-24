@@ -7,12 +7,11 @@ A plugin for freecad to browse the object hierarchy
 
 a)
 
- - install the plugin loader https://github.com/microelly2/freecad-pluginloader
- - from inside the pluginloader install the package ObjTree
+ - TBD
 
 b)
 
- - copy the icons from the icons folder into /usr/lib/freecad/Mod/plugins/objecttree/icons
+ - copy the icons from the icons folder into ~/.local/share/FreeCAD/Mod/plugins/objecttree/icons
  - download the objecttree.py into your macro folder
  - execute this python file as a macro or paste it into the python console 
 
@@ -39,6 +38,3 @@ If you change the selection in the FreeCAD env you have to refresh the view usin
 #Open, Todos
 
 - change the direction of the display 
-- make parameteres configurable (width of the family view, format snapshot, ...)
-- port to other oparating systems
-- better icon access
