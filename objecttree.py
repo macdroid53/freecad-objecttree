@@ -248,10 +248,22 @@ class MyBut(QtGui.QPushButton):
 		import random
 		self.obvisi=self.obj.ViewObject.Visibility
 		self.color=self.obj.ViewObject.ShapeColor
-		self.obj.ViewObject.ShapeColor=(1.0,0.5,1.0)
-		self.obj.ViewObject.Transparency=0
-		self.obj.ViewObject.DisplayMode = "Flat Lines"
-		self.obj.ViewObject.Visibility=True
+		try:
+			self.obj.ViewObject.ShapeColor=(1.0,0.5,1.0)
+		except:
+			pass
+		try:
+			self.obj.ViewObject.Transparency=0
+		except:
+			pass
+		try:
+			self.obj.ViewObject.DisplayMode = "Flat Lines"
+		except:
+			pass
+		try:
+			self.obj.ViewObject.Visibility=True
+		except:
+			pass
 		print("mouse enter A " + self.obj.Label)
 		try:
 			if lastObj:
@@ -300,9 +312,19 @@ def hideall():
 	os=FreeCAD.ActiveDocument.Objects
 	for obj in os:
 		FreeCAD.Console.PrintMessage("!# ")
-		obj.ViewObject.Transparency=90
-		self.obj.ViewObject.DisplayMode = "Shaded"
-		obj.ViewObject.Visibility=False
+		try:
+			obj.ViewObject.Transparency=90
+		except:
+			pass
+#		self.obj.ViewObject.DisplayMode = "Shaded"
+		try:
+			obj.ViewObject.DisplayMode = "Shaded"
+		except:
+			pass
+		try:
+			obj.ViewObject.Visibility=False
+		except:
+			pass
 
 
 global showall2
@@ -312,9 +334,18 @@ def showall2():
 	# print(os)
 	for obj in os:
 #		print("show all")
-		obj.ViewObject.Visibility=buff[obj][0]
-		obj.ViewObject.Transparency=buff[obj][1]
-		obj.ViewObject.DisplayMode = "Flat Lines"
+		try:
+			obj.ViewObject.Visibility=buff[obj][0]
+		except:
+			pass
+		try:
+			obj.ViewObject.Transparency=buff[obj][1]
+		except:
+			pass
+		try:
+			obj.ViewObject.DisplayMode = "Flat Lines"
+		except:
+			pass
 #		obj.ViewObject.Visibility=buff[obj][0]
 #		print("!" +obj.Label + ":"+str(obj.ViewObject.Transparency) + "-- "+ str(obj.ViewObject.Visibility))
 	#FreeCADGui.SendMsgToActiveView("ViewFit")
@@ -399,9 +430,18 @@ class MyWindow2(QtGui.QWidget) :
 			print("huhu")
 		for obj in context.keys():
 			print("show all context -- " + obj.Label)
-			obj.ViewObject.Visibility=True
-			obj.ViewObject.Transparency=80
-			obj.ViewObject.DisplayMode = "Shaded"
+			try:
+				obj.ViewObject.Visibility=True
+			except:
+				pass
+			try:
+				obj.ViewObject.Transparency=80
+			except:
+				pass
+			try:
+				obj.ViewObject.DisplayMode = "Shaded"
+			except:
+				pass
 
 		print("showall2 done")
 
@@ -653,7 +693,7 @@ class MyWidget(QtGui.QWidget):
 #			self.layout.addWidget(butte, oy+self.line, ox+3*row+2)
 
 		
-		print(AppHomePath)
+		print(LocalSharePath)
 		if row >0:
 			if mode ==1  :
 				butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/single.png'),"")
@@ -726,7 +766,7 @@ def sayWidgetTree(w,ot,mode=0,dir='+x'):
 	for p in vlines.keys():
 		if vlines[p]:
 			if vlines[p]==1 and filled[w.line][3*p+2]!=1:
-				butte= QtGui.QPushButton(QtGui.QIcon(AppHomePath+'/Mod/plugins/objecttree/icons/down.png'),"" )
+				butte= QtGui.QPushButton(QtGui.QIcon(LocalSharePath+'/Mod/plugins/objecttree/icons/down.png'),"" )
 	anz=len(ot['subs'])
 	startline=w.line
 	if ot['status']=='normal':
